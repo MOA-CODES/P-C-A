@@ -1,25 +1,34 @@
 require('dotenv').config()
 require('express-async-errors')
 
-const conn = require('./db/conn')
 const sequelize = require('sequelize')
 const express = require('express')
+const bodyParser = require('body-parser')
+
+const conn = require('./db/conn')
+const notfound = require('./middleware/not-found')
+const routes = require('./routes/routes')
+
 const app = express()
+const PORT = process.env.PORT || 3001
 
-const nf = require('./middleware/not-found')
-
-
-
-app.get('/api/home', (req, res)=>{
+app.get('/', (req, res)=>{
     res.json({info: 'Node.js, Express, and Postgres API'})
-    // .send('Postgres Crud app')
 })
 
-app.use(express.json())
-app.use(nf)
+app.use(bodyParser.json())
 
-app.listen(8000, ()=>{
-    console.log('listening on port 8000')
+app.use(bodyParser.urlencoded({
+    extended: true,
+}))
+
+app.use('/api/v1', routes)
+
+app.use(express.json())
+app.use(notfound)
+
+app.listen(PORT, ()=>{
+    console.log(`listening on port ${PORT}`)
 })
 
 
